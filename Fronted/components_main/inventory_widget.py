@@ -4,27 +4,41 @@ from PySide6.QtCore import Qt
 class InventoryWidget(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFrameShape(QFrame.StyledPanel)
-        self.setFrameShadow(QFrame.Raised)
+        self.setFrameShape(QFrame.StyledPanel) # Establece el marco como un panel estilizado
+        self.setFrameShadow(QFrame.Raised) # Establece la sombra del marco como elevada
 
+        # Llamar a un método para configurar la UI
+        self._setup_ui() 
+
+    def _setTitle(self):
+        title_label = QLabel("Inventario")
+        font = title_label.font()
+        font.setPointSize(18)
+        font.setBold(True)
+        title_label.setFont(font)
+        title_label.setAlignment(Qt.AlignCenter)
+        return title_label
+
+    def _setup_buttons(self):
+        add_button = QPushButton("Agregar")
+        delete_button = QPushButton("Eliminar")
+        
+        # Configurar el layout de los botones
+        button_layout = QVBoxLayout()
+        button_layout.addWidget(add_button)
+        button_layout.addWidget(delete_button)
+        
+        return button_layout
+
+    def _setup_ui(self):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
 
-        title_label = QLabel("Inventario")
-        font = title_label.font()
-        font.setPointSize(16)
-        font.setBold(True)
-        title_label.setFont(font)
-        title_label.setAlignment(Qt.AlignCenter)
+        # Establecer el título del inventario
+        title_label = self._setTitle()
         main_layout.addWidget(title_label)
-
-        buttons_layout = QHBoxLayout()
         
-        add_button = QPushButton("Agregar")
-        delete_button = QPushButton("Eliminar")
-
-        buttons_layout.addWidget(add_button)
-        buttons_layout.addWidget(delete_button)
-        
-        main_layout.addLayout(buttons_layout) 
+        # Agregar un espacio para el contenido del inventario
+        button_layout = self._setup_buttons()
+        main_layout.addLayout(button_layout)
