@@ -1,21 +1,21 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QApplication, QHBoxLayout
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from .components_main.inventory_widget import InventoryWidget
+# Importamos todos los widgets de tarjetas, incluyendo el nuevo
+from .components_main.tarjetas import InventoryWidget, CajaWidget, FinanzasWidget
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("BookOS 2.0")
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         
         # Llamar a un método para configurar la UI
-        self._setup_ui() # Aquí se llama al nuevo método
+        self._setup_ui() 
 
     def _configsize(self):
         # Dimensiones de la ventana (igual que antes)
-        window_width = 800
-        window_height = 600
+        window_width = 1200
+        window_height = 800
 
         # 1. Obtener la geometría de la pantalla principal
         screen = QApplication.primaryScreen()
@@ -42,23 +42,91 @@ class MainWindow(QWidget):
         title_label.setStyleSheet("color: #333;")  # Estilo de color
         return title_label
 
+
+    def _tarjetas_layout(self):
+        cards_holder_layout = QHBoxLayout()
+        cards_holder_layout.setSpacing(25)
+        cards_holder_layout.setContentsMargins(0, 0, 0, 0)
+        cards_holder_layout.addStretch(1)
+
+        def _create_inventory_column():
+            #1. Crear el layout invisible que contendrá las tarjetas
+            col_widget = QWidget()
+            col_layout = QVBoxLayout(col_widget)
+
+            #2. Espaciado y márgenes dentro de la columna
+            col_layout.setSpacing(15)
+            col_layout.setContentsMargins(0, 0, 0, 0)
+
+            #3. Crear la tarjeta de inventario y establecer su tamaño
+            inventory_card = InventoryWidget(self)
+            inventory_card.setFixedSize(275, 220)
+
+            #4. Añadir la tarjeta al layout de la columna
+            col_layout.addWidget(inventory_card)
+            col_layout.addStretch(1) #Empuja la tarjeta hacia arriba
+
+            #5. Devolver el widget de la columna para añadirlo al layout principal
+            return col_widget
+
+        def _create_caja_column(): #Solo modifica la posicion y el tamaño de los widgets
+            col_widget = QWidget()
+            col_layout = QVBoxLayout(col_widget)
+            col_layout.setSpacing(15)
+            col_layout.setContentsMargins(0, 0, 0, 0)
+            caja_card = CajaWidget(self)
+            caja_card.setFixedSize(250, 200)
+            col_layout.addWidget(caja_card)
+            col_layout.addStretch(1) 
+            return col_widget
+
+        def _create_finanzas_column(): 
+            col_widget = QWidget()
+            col_layout = QVBoxLayout(col_widget)
+            col_layout.setSpacing(15)
+            col_layout.setContentsMargins(0, 0, 0, 0)
+            finanzas_card = FinanzasWidget(self)
+            finanzas_card.setFixedSize(275, 220)
+            col_layout.addWidget(finanzas_card)
+            col_layout.addStretch(1)
+            return col_widget
+
+        cards_holder_layout.addWidget(_create_inventory_column())
+        cards_holder_layout.addWidget(_create_caja_column())
+        cards_holder_layout.addWidget(_create_finanzas_column())
+
+        cards_holder_layout.addStretch(1)
+
+        cards_container_widget = QWidget()
+        cards_container_widget.setLayout(cards_holder_layout)
+        return cards_container_widget
+
+
     def _setup_ui(self):
         """Configura la interfaz de usuario de la ventana principal."""
-        self._configsize()  # Llamar al método para configurar el tamaño y posición de la ventana
+        self._configsize()
 
-        # Crear el Layout principal
+        # Layout principal vertical
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
+        main_layout.setSpacing(40)  # Un espaciado vertical entre el título y las tarjetas
 
-        # Establecer el título de la ventana
-        title_label = self._setTitle()  # Llamar al método para obtener el título
-        main_layout.addWidget(title_label)
+        # 1. AÑADIMOS UN ESPACIADOR ELÁSTICO ARRIBA
+        main_layout.addStretch(1)
 
-        # Agregar el contendedor de inventario
-        inventory_section = InventoryWidget()
-        main_layout.addWidget(inventory_section)
+        # 2. Establecemos el título
+        title_label = self._setTitle()
+        main_layout.addWidget(title_label, alignment=Qt.AlignTop | Qt.AlignHCenter)
 
-        main_layout.addStretch()
+        # 3. Espaciador fijo para separar el título del contenido
+        main_layout.addSpacing(60)
+
+        # 4. Creamos y añadimos el widget que contiene el layout de tarjetas
+        cards_widget = self._tarjetas_layout()
+        main_layout.addWidget(cards_widget)
+
+        # 5. AÑADIMOS OTRO ESPACIADOR ELÁSTICO ABAJO
+        # Los dos espaciadores empujarán todo el contenido al centro vertical.
+        main_layout.addStretch(3)
 
         self.setLayout(main_layout)
